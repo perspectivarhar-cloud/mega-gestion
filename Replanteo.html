@@ -1,0 +1,599 @@
+<title>Replanteo Previo – Circuito Integrado de Gestión</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #F7F8FA; --bg2: #FFFFFF; --fg: #1A1A2E; --fg2: #4A4A6A;
+    --fg3: #8A8AAA; --border: #DDE1EC;
+    --green-dark: #0F4D2E; --green: #1A7A4A; --green-light: #E8F5EE;
+    --orange: #E8631A; --orange-light: #FFF3E8;
+    --red: #C0392B; --red-light: #FDECEA;
+    --blue: #2D7DD2; --blue-light: #EAF2FB;
+    --yellow: #F5C842; --yellow-light: #FFFBEA;
+    --focus: #2D7DD2; --shadow: 0 2px 8px rgba(0,0,0,0.08); --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#0F1117;--bg2:#1A1D27;--fg:#E8EAF0;--fg2:#A0A4B8;
+      --fg3:#5A5E72;--border:#2A2D3E;color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#0F1117;--bg2:#1A1D27;--fg:#E8EAF0;--fg2:#A0A4B8;
+    --fg3:#5A5E72;--border:#2A2D3E;color-scheme:dark;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--fg);font-size:14px;line-height:1.6;}
+
+  /* TOP BAR */
+  .topbar{background:var(--green-dark);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:12px;}
+  .topbar-logo{font-size:20px;font-weight:700;letter-spacing:-.5px;}
+  .topbar-sep{opacity:.4;}
+  .topbar-title{font-size:14px;opacity:.85;}
+  .topbar-badge{margin-left:auto;background:var(--yellow);color:#5A3800;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;}
+
+  /* LAYOUT */
+  .page{max-width:800px;margin:0 auto;padding:28px 20px 48px;}
+
+  /* LOOKUP */
+  .lookup-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:visible;margin-bottom:20px;}
+  .lookup-header{background:var(--blue);color:#fff;padding:12px 20px;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;}
+  .lookup-body{padding:20px;display:flex;gap:12px;align-items:flex-end;}
+  .lookup-body .field{flex:1;}
+  .btn-buscar{padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;}
+  .btn-buscar:hover{background:#1A5FA8;}
+
+  /* OBRA DATA PANEL */
+  .obra-panel{display:none;background:#EAF2FB;border:1.5px solid #2D7DD2;border-radius:8px;padding:14px 18px;margin-bottom:20px;}
+  .obra-panel.visible{display:block;}
+  .obra-panel-title{font-size:11px;font-weight:700;color:#1A5FA8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+  .obra-data-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 20px;}
+  @media(max-width:500px){.obra-data-grid{grid-template-columns:1fr;}}
+  .obra-data-item{font-size:13px;color:#1A1A2E;}
+  .obra-data-item span{font-weight:600;color:#1A1A2E;}
+  .obra-data-label{color:#4A4A6A;font-weight:400;}
+
+  /* NOT FOUND */
+  .not-found{background:var(--red-light);border:1px solid var(--red);border-radius:8px;padding:12px 16px;font-size:13px;color:#7A0000;display:none;margin-bottom:16px;}
+  .not-found.visible{display:block;}
+
+  /* SEARCH DROPDOWN */
+  .search-dropdown{position:absolute;left:0;right:0;background:#FFFFFF;border:1.5px solid #2D7DD2;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.18);z-index:999;display:none;margin-top:4px;overflow:visible;}
+  .search-dropdown.visible{display:block;}
+  .sd-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
+  .sd-item:last-child{border-bottom:none;}
+  .sd-item:hover{background:var(--blue-light);}
+  .sd-id{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.05em;margin-bottom:2px;}
+  .sd-cliente{font-size:13px;font-weight:600;color:#1A1A2E;}
+  .sd-dir{font-size:12px;color:var(--fg2);margin-top:1px;}
+  .sd-estado{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:3px;background:#FFFBEA;color:#7A5A00;}
+
+  /* FORM CARD */
+  .form-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);}
+  .section-header{background:var(--green);color:#fff;padding:12px 20px;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:8px;}
+  .section-header .num{background:rgba(255,255,255,.2);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .form-body{padding:20px;display:flex;flex-direction:column;gap:16px;}
+
+  /* FIELD */
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:12px;font-weight:600;color:var(--fg2);text-transform:uppercase;letter-spacing:.05em;}
+  .field label .req{color:var(--orange);margin-left:2px;}
+  .field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--fg);font-family:inherit;font-size:14px;transition:border-color .15s;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--focus);}
+  .field textarea{resize:vertical;min-height:80px;}
+
+  /* ROWS */
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:540px){.row-2{grid-template-columns:1fr;}}
+
+  /* RADIOS */
+  .radio-group{display:flex;gap:10px;flex-wrap:wrap;}
+  .radio-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;user-select:none;}
+  .radio-btn input[type=radio]{accent-color:var(--green);}
+  .radio-btn:has(input:checked){border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+  .radio-btn.red-opt:has(input:checked){border-color:var(--red);background:var(--red-light);color:var(--red);}
+
+  /* CONDITIONAL */
+  .conditional{display:none;}
+  .conditional.visible{display:block;}
+
+  /* MEDIDAS TABLE */
+  .table-wrap{overflow-x:auto;}
+  table.medidas{width:100%;border-collapse:collapse;font-size:13px;}
+  table.medidas th{background:var(--green-dark);color:#fff;padding:8px 10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+  table.medidas td{padding:6px 6px;border-bottom:1px solid var(--border);}
+  table.medidas input{width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:5px;background:var(--bg);color:var(--fg);font-family:inherit;font-size:13px;}
+  table.medidas input:focus{outline:none;border-color:var(--focus);}
+  .btn-add-row{margin-top:10px;padding:7px 16px;background:transparent;border:1.5px dashed var(--border);border-radius:7px;color:var(--fg2);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+  .btn-add-row:hover{border-color:var(--green);color:var(--green);}
+  .btn-del-row{background:none;border:none;color:var(--fg3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;}
+  .btn-del-row:hover{color:var(--red);}
+
+  /* UPLOAD */
+  .upload-zone{border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+  .upload-zone:hover{border-color:var(--green);background:var(--green-light);}
+  .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .upload-zone .uz-icon{font-size:26px;margin-bottom:4px;}
+  .upload-zone .uz-label{font-size:13px;font-weight:600;color:var(--fg2);}
+  .upload-zone .uz-hint{font-size:11px;color:var(--fg3);margin-top:2px;}
+  .file-list{margin-top:8px;display:flex;flex-direction:column;gap:4px;}
+  .file-item{font-size:12px;color:var(--green);font-weight:500;}
+
+  /* DIVIDER */
+  .divider{border:none;border-top:1px solid var(--border);margin:4px 0;}
+
+  /* ACTION BUTTONS */
+  .action-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+  @media(max-width:500px){.action-row{grid-template-columns:1fr;}}
+  .btn-approve{padding:14px;border:none;border-radius:9px;background:var(--green);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s;}
+  .btn-approve:hover{background:var(--green-dark);}
+  .btn-block{padding:14px;border:none;border-radius:9px;background:var(--red);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s;}
+  .btn-block:hover{background:#8B0000;}
+
+  /* SUCCESS / ERROR TOAST */
+  .toast{display:none;border-radius:9px;padding:16px 20px;font-size:14px;font-weight:500;margin-top:16px;}
+  .toast.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+  .toast.err{background:var(--red-light);border:1.5px solid var(--red);color:#7A0000;}
+  .toast.visible{display:block;}
+</style>
+
+<div class="topbar">
+  <span class="topbar-logo">MEGA</span>
+  <span class="topbar-sep">|</span>
+  <span class="topbar-title">Formulario de Replanteo Previo</span>
+  <span class="topbar-badge">Técnico</span>
+</div>
+
+<div class="page">
+
+  <!-- LOOKUP -->
+  <div class="lookup-card">
+    <div class="lookup-header">🔍 Buscar obra</div>
+    <div class="lookup-body">
+      <div class="field" style="position:relative;z-index:999;">
+        <label>ID, cliente o dirección</label>
+        <input type="text" id="searchId" placeholder="Ej: López, San Martín 1245, MEGA-2026-049…" autocomplete="off">
+        <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="not-found" id="notFound">⚠️ No se encontró ninguna obra. Probá con otro término.</div>
+
+  <!-- OBRA PANEL -->
+  <div class="obra-panel" id="obraPanel">
+    <div class="obra-panel-title">📋 Datos de la obra</div>
+    <div class="obra-data-grid" id="obraDataGrid"></div>
+  </div>
+
+  <!-- FORM (oculto hasta buscar) -->
+  <div id="formContent" style="display:none;">
+
+    <!-- SECTION 1: DATOS DEL REPLANTEO -->
+    <div class="form-card">
+      <div class="section-header"><span class="num">1</span> Datos del replanteo</div>
+      <div class="form-body">
+
+        <div class="row-2">
+          <div class="field">
+            <label>Fecha del replanteo <span class="req">*</span></label>
+            <input type="date" id="fechaRep">
+          </div>
+          <div class="field">
+            <label>Técnico responsable <span class="req">*</span></label>
+            <input type="text" id="tecnico" placeholder="Nombre del técnico">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Resultado del replanteo <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-btn">
+              <input type="radio" name="resultado" value="ok">
+              ✅ Exitoso — puede avanzar
+            </label>
+            <label class="radio-btn">
+              <input type="radio" name="resultado" value="obs">
+              ⚠️ Con observaciones
+            </label>
+            <label class="radio-btn red-opt">
+              <input type="radio" name="resultado" value="problema">
+              ❌ Con problemas
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2: MEDIDAS -->
+    <div class="form-card">
+      <div class="section-header"><span class="num">2</span> Medidas relevadas</div>
+      <div class="form-body">
+
+        <div class="table-wrap">
+          <table class="medidas" id="medidasTable">
+            <thead>
+              <tr>
+                <th>Ref.</th>
+                <th>Descripción</th>
+                <th>Ancho (mm)</th>
+                <th>Alto (mm)</th>
+                <th>Observación</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="medidasBody">
+              <!-- filas dinámicas -->
+            </tbody>
+          </table>
+        </div>
+        <button class="btn-add-row" id="btnAddRow">+ Agregar abertura</button>
+
+      </div>
+    </div>
+
+    <!-- SECTION 3: OBSERVACIONES Y DOCS -->
+    <div class="form-card">
+      <div class="section-header"><span class="num">3</span> Observaciones y documentación</div>
+      <div class="form-body">
+
+        <div class="field">
+          <label>Observaciones técnicas</label>
+          <textarea id="obsTecnicas" placeholder="Detalles del terreno, condiciones de obra, aclaraciones…"></textarea>
+        </div>
+
+        <div class="field">
+          <label>¿Hay modificaciones respecto al presupuesto original? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-btn">
+              <input type="radio" name="modif" value="no"> No
+            </label>
+            <label class="radio-btn">
+              <input type="radio" name="modif" value="si"> Sí
+            </label>
+          </div>
+        </div>
+
+        <div class="conditional" id="modifDiv">
+          <div class="field">
+            <label>Descripción de las modificaciones <span class="req">*</span></label>
+            <textarea id="modifDesc" placeholder="Qué cambia respecto al presupuesto original…"></textarea>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Adjuntar fotos / croquis</label>
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" accept="image/*,.pdf" multiple id="fileInput">
+            <div class="uz-icon">📸</div>
+            <div class="uz-label">Arrastrá o hacé clic para adjuntar</div>
+            <div class="uz-hint">Fotos, croquis o PDF — múltiples archivos</div>
+          </div>
+          <div class="file-list" id="fileList"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="action-row">
+      <button class="btn-approve" id="btnAprobar">
+        ✓ Confirmar replanteo → En producción
+      </button>
+      <button class="btn-block" id="btnBloquear">
+        ✕ Replanteo con problemas → Bloquear obra
+      </button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+  </div><!-- /formContent -->
+
+</div><!-- /page -->
+
+<script>
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyr_4NOUZr-YxlAaVrWcich_NnEErwzWZHroGFUfDWB9oNvc4wN5z_fm3-wvfAOA80iwg/exec';
+
+  // Cache de obras cargadas del Sheet (estado: REPLANTEO PENDIENTE)
+  let OBRAS_CACHE = {};
+
+  // ── inicialización al final del script (después de que todas las funciones están definidas) ──
+
+  function busquedaLive(val) {
+    const dd = document.getElementById('searchDropdown');
+    const notFound = document.getElementById('notFound');
+    notFound.classList.remove('visible');
+    const q = val.trim().toLowerCase();
+    if (q.length < 2) { cerrarDropdown(); return; }
+
+    const resultados = Object.entries(OBRAS_CACHE).filter(function(entry) {
+      var id = entry[0].toLowerCase();
+      var o = entry[1];
+      return id.includes(q) ||
+        o.cliente.toLowerCase().includes(q) ||
+        o.direccion.toLowerCase().includes(q);
+    });
+
+    dd.innerHTML = '';
+    if (!resultados.length) {
+      cerrarDropdown();
+      return;
+    }
+    resultados.forEach(function(entry) {
+      var id = entry[0]; var o = entry[1];
+      var item = document.createElement('div');
+      item.className = 'sd-item';
+      var dId = document.createElement('div'); dId.className = 'sd-id'; dId.textContent = id;
+      var dCli = document.createElement('div'); dCli.className = 'sd-cliente'; dCli.textContent = o.cliente;
+      var dDir = document.createElement('div'); dDir.className = 'sd-dir'; dDir.textContent = o.direccion;
+      var dEst = document.createElement('span'); dEst.className = 'sd-estado'; dEst.textContent = o.estado;
+      item.appendChild(dId); item.appendChild(dCli); item.appendChild(dDir); item.appendChild(dEst);
+      item.addEventListener('click', function(){ seleccionarObra(id); });
+      dd.appendChild(item);
+    });
+    dd.classList.add('visible');
+  }
+
+  function cerrarDropdown() {
+    document.getElementById('searchDropdown').classList.remove('visible');
+  }
+
+  function seleccionarObra(id) {
+    document.getElementById('searchId').value = id;
+    cerrarDropdown();
+    const notFound = document.getElementById('notFound');
+    const panel = document.getElementById('obraPanel');
+    const form = document.getElementById('formContent');
+    const grid = document.getElementById('obraDataGrid');
+
+    notFound.classList.remove('visible');
+    panel.classList.remove('visible');
+    form.style.display = 'none';
+
+    const obra = OBRAS_CACHE[id];
+    if (!obra) { notFound.classList.add('visible'); return; }
+
+    if (obra.estado !== 'REPLANTEO PENDIENTE') {
+      notFound.textContent = '⚠️ La obra ' + id + ' no está en estado "Replanteo pendiente" (estado actual: ' + obra.estado + ').';
+      notFound.classList.add('visible');
+      return;
+    }
+
+    var campos = [
+      ['Cliente', obra.cliente],
+      ['Dirección', obra.direccion],
+      ['Vendedor', obra.vendedor],
+      ['Tipo de trabajo', obra.tipoTrabajo],
+      ['Color', obra.color],
+      ['Vidrio', obra.vidrio],
+      ['Plazo', obra.plazo],
+      ['Estado', obra.estado]
+    ];
+    grid.innerHTML = '';
+    campos.forEach(function(par) {
+      var div = document.createElement('div'); div.className = 'obra-data-item';
+      var l = document.createElement('span'); l.className = 'obra-data-label'; l.textContent = par[0] + ': ';
+      var v = document.createElement('span'); v.textContent = par[1];
+      div.appendChild(l); div.appendChild(v); grid.appendChild(div);
+    });
+    panel.classList.add('visible');
+    form.style.display = 'block';
+    setTimeout(function(){ panel.scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+  }
+
+  function buscarObra() { busquedaLive(document.getElementById('searchId').value); }
+
+  // ── TABLA DINÁMICA DE MEDIDAS ──
+  let rowCount = 0;
+  function makeInput(type, placeholder, isNum) {
+    const inp = document.createElement('input');
+    inp.type = type;
+    inp.placeholder = placeholder;
+    if (isNum) inp.min = '0';
+    inp.style.cssText = 'width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:5px;background:var(--bg);color:var(--fg);font-family:inherit;font-size:13px;box-sizing:border-box;';
+    inp.addEventListener('focus', function(){ this.style.outlineColor = 'var(--focus)'; });
+    return inp;
+  }
+  function addRow() {
+    rowCount++;
+    const tbody = document.getElementById('medidasBody');
+    const tr = document.createElement('tr');
+    tr.id = 'row-' + rowCount;
+    const defs = [
+      ['text','Ej: V1',false],
+      ['text','Ventana dormitorio',false],
+      ['number','1200',true],
+      ['number','1100',true],
+      ['text','Observación',false]
+    ];
+    defs.forEach(([type,ph,num]) => {
+      const td = document.createElement('td');
+      td.appendChild(makeInput(type, ph, num));
+      tr.appendChild(td);
+    });
+    const tdDel = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn-del-row';
+    btn.title = 'Eliminar fila';
+    btn.textContent = '×';
+    const rid = 'row-' + rowCount;
+    btn.addEventListener('click', function(){ delRow(rid); });
+    tdDel.appendChild(btn);
+    tr.appendChild(tdDel);
+    tbody.appendChild(tr);
+  }
+  function delRow(id) {
+    const el = document.getElementById(id);
+    if(el && document.getElementById('medidasBody').children.length > 1) el.remove();
+  }
+
+  // ── CONDICIONALES ──
+  function toggleResultado() {
+    // placeholder para lógica adicional si se necesita
+  }
+  function toggleModif() {
+    const val = document.querySelector('input[name="modif"]:checked')?.value;
+    document.getElementById('modifDiv').classList.toggle('visible', val === 'si');
+  }
+
+  // ── ARCHIVOS ──
+  function handleFiles(input) {
+    const list = document.getElementById('fileList');
+    list.innerHTML = '';
+    Array.from(input.files).forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'file-item';
+      div.textContent = '✓ ' + f.name;
+      list.appendChild(div);
+    });
+    if(input.files.length) document.getElementById('uploadZone').style.borderColor = 'var(--green)';
+  }
+
+  // ── CONFIRMAR ──
+  function confirmarReplanteo(accion) {
+    const id = document.getElementById('searchId').value.trim().toUpperCase();
+    const fecha = document.getElementById('fechaRep').value;
+    const tecnico = document.getElementById('tecnico').value.trim();
+    const resultado = document.querySelector('input[name="resultado"]:checked')?.value;
+    const modif = document.querySelector('input[name="modif"]:checked')?.value;
+
+    // Validar
+    if (!fecha || !tecnico || !resultado || !modif) {
+      showToast('Completá todos los campos obligatorios antes de continuar.', 'err');
+      return;
+    }
+    if (modif === 'si' && !document.getElementById('modifDesc').value.trim()) {
+      showToast('Describí las modificaciones antes de continuar.', 'err');
+      return;
+    }
+
+    // Validar filas de medidas
+    const filas = document.querySelectorAll('#medidasBody tr');
+    let tieneMediada = false;
+    filas.forEach(tr => {
+      const inputs = tr.querySelectorAll('input');
+      if(inputs[2].value || inputs[3].value) tieneMediada = true;
+    });
+    if(!tieneMediada) {
+      showToast('Ingresá al menos una medida antes de continuar.', 'err');
+      return;
+    }
+
+    // Recolectar medidas
+    const medidas = [];
+    document.querySelectorAll('#medidasBody tr').forEach(function(tr) {
+      var inputs = tr.querySelectorAll('input');
+      if (inputs[2].value || inputs[3].value) {
+        medidas.push({ item: inputs[0].value, pos: inputs[1].value, ancho: inputs[2].value, alto: inputs[3].value, cant: inputs[4].value, obs: inputs[5] ? inputs[5].value : '' });
+      }
+    });
+
+    // Deshabilitar botones mientras se envía
+    var btnA = document.getElementById('btnAprobar');
+    var btnB = document.getElementById('btnBloquear');
+    btnA.disabled = true; btnB.disabled = true;
+    btnA.textContent = 'Enviando…'; btnB.textContent = 'Enviando…';
+
+    var payload = {
+      accion: 'replanteo',
+      idObra: id,
+      fechaReplanteo: fecha,
+      tecnico: tecnico,
+      resultado: resultado,
+      cantAberturas: medidas.length,
+      medidas: JSON.stringify(medidas),
+      obsTecnicas: document.getElementById('obsTecnicas').value.trim(),
+      modifPresup: modif,
+      descModif: modif === 'si' ? document.getElementById('modifDesc').value.trim() : '',
+      accionReplanteo: accion
+    };
+
+    fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          if (accion === 'aprobar') {
+            showToast('✓ Replanteo de obra ' + id + ' confirmado. La obra pasó a EN PRODUCCIÓN.', 'ok');
+          } else {
+            showToast('✕ Obra ' + id + ' bloqueada. Se notificó al equipo comercial.', 'err');
+          }
+          // Limpiar formulario después de 2s
+          setTimeout(function() {
+            document.getElementById('searchId').value = '';
+            document.getElementById('obraPanel').classList.remove('visible');
+            document.getElementById('formContent').style.display = 'none';
+            btnA.disabled = false; btnB.disabled = false;
+            btnA.textContent = '✓ Aprobar — pasar a producción';
+            btnB.textContent = '✕ Bloquear obra';
+            // Recargar cache
+            cargarObras();
+          }, 2000);
+        } else {
+          showToast('Error: ' + (data.error || 'intente nuevamente'), 'err');
+          btnA.disabled = false; btnB.disabled = false;
+          btnA.textContent = '✓ Aprobar — pasar a producción';
+          btnB.textContent = '✕ Bloquear obra';
+        }
+      })
+      .catch(function() {
+        showToast('Error de conexión. Verificá tu acceso y volvé a intentar.', 'err');
+        btnA.disabled = false; btnB.disabled = false;
+        btnA.textContent = '✓ Aprobar — pasar a producción';
+        btnB.textContent = '✕ Bloquear obra';
+      });
+  }
+
+  function showToast(msg, tipo) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + tipo + ' visible';
+    t.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  // ── CARGA DE OBRAS DESDE EL SHEET ──
+  function cargarObras() {
+    fetch(WEB_APP_URL + '?accion=obras', { method: 'GET' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.ok) return;
+        OBRAS_CACHE = {};
+        data.obras.forEach(function(o) {
+          var id = o['ID'] || '';
+          if (!id) return;
+          OBRAS_CACHE[id] = {
+            cliente:     o['CLIENTE']      || '',
+            direccion:   o['DIR OBRA']     || '',
+            vendedor:    o['VENDEDOR']     || '',
+            tipoTrabajo: o['TIPO TRABAJO'] || '',
+            color:       o['COLOR']        || '',
+            vidrio:      o['TIPO VIDRIO']  || '',
+            plazo:       (o['PLAZO'] || '30') + ' días hábiles',
+            estado:      o['ESTADO']       || ''
+          };
+        });
+      })
+      .catch(function() { /* si falla, el cache queda vacío y se informa al buscar */ });
+  }
+
+  // ── INICIALIZACIÓN — acá todas las funciones ya están definidas ──
+  document.getElementById('fechaRep').value = new Date().toISOString().slice(0,10);
+  cargarObras();
+
+  document.getElementById('searchId').addEventListener('input', function(){ busquedaLive(this.value); });
+  document.getElementById('searchId').addEventListener('keydown', function(e){ if(e.key==='Escape') cerrarDropdown(); });
+  document.getElementById('btnAddRow').addEventListener('click', function(){ addRow(); });
+  document.getElementById('btnAprobar').addEventListener('click', function(){ confirmarReplanteo('aprobar'); });
+  document.getElementById('btnBloquear').addEventListener('click', function(){ confirmarReplanteo('bloquear'); });
+
+  document.querySelectorAll('input[name="resultado"]').forEach(function(r){
+    r.addEventListener('change', toggleResultado);
+  });
+  document.querySelectorAll('input[name="modif"]').forEach(function(r){
+    r.addEventListener('change', toggleModif);
+  });
+  document.getElementById('fileInput').addEventListener('change', function(){ handleFiles(this); });
+
+  // 3 filas iniciales
+  for(var i=0;i<3;i++) addRow();
+
+</script>

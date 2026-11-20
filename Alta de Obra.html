@@ -1,0 +1,612 @@
+<title>Alta de Obra – Circuito Integrado de Gestión</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #F7F8FA;
+    --bg2: #FFFFFF;
+    --fg: #1A1A2E;
+    --fg2: #4A4A6A;
+    --fg3: #8A8AAA;
+    --border: #DDE1EC;
+    --green-dark: #0F4D2E;
+    --green: #1A7A4A;
+    --green-light: #E8F5EE;
+    --orange: #E8631A;
+    --orange-light: #FFF3E8;
+    --red: #C0392B;
+    --blue: #2D7DD2;
+    --violet: #7B2D8B;
+    --grey-state: #8A9B92;
+    --yellow: #F5C842;
+    --focus: #2D7DD2;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1117; --bg2: #1A1D27; --fg: #E8EAF0; --fg2: #A0A4B8;
+      --fg3: #5A5E72; --border: #2A2D3E; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1117; --bg2: #1A1D27; --fg: #E8EAF0; --fg2: #A0A4B8;
+    --fg3: #5A5E72; --border: #2A2D3E; color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg); color: var(--fg); font-size: 14px; line-height: 1.6;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--green-dark); color: #fff;
+    padding: 14px 24px; display: flex; align-items: center; gap: 12px;
+  }
+  .topbar-logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-sep { opacity: .4; }
+  .topbar-title { font-size: 14px; opacity: .85; }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 980px; margin: 0 auto; padding: 28px 20px 48px; }
+  .layout { display: grid; grid-template-columns: 1fr 260px; gap: 24px; align-items: start; }
+  @media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { order: -1; }
+  }
+
+  /* ── ID CHIP ── */
+  .id-chip {
+    background: var(--green-dark); color: #fff;
+    border-radius: 8px; padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .id-chip-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
+  .id-chip-value { font-size: 22px; font-weight: 700; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .id-chip-hint { font-size: 11px; opacity: .6; margin-top: 2px; }
+  .id-left { display: flex; flex-direction: column; }
+
+  /* ── FORM CARD ── */
+  .form-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .section-header {
+    background: var(--green); color: #fff;
+    padding: 12px 20px; font-weight: 600; font-size: 13px;
+    text-transform: uppercase; letter-spacing: .06em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-header .num {
+    background: rgba(255,255,255,.2); border-radius: 50%;
+    width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .form-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── FIELD ── */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--fg2); text-transform: uppercase; letter-spacing: .05em; }
+  .field label .req { color: var(--orange); margin-left: 2px; }
+  .field input, .field select, .field textarea {
+    padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 7px;
+    background: var(--bg); color: var(--fg); font-family: inherit; font-size: 14px;
+    transition: border-color .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: var(--focus);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  /* ── TWO / THREE COL ── */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 540px) {
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── ADDRESS ── */
+  .addr-row1 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+  .addr-row2 { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 14px; }
+  @media (max-width: 540px) {
+    .addr-row1, .addr-row2 { grid-template-columns: 1fr; }
+  }
+
+  /* ── DATE DISPLAY ── */
+  .date-result {
+    margin-top: 4px; font-size: 12px; color: var(--green);
+    font-weight: 500; min-height: 18px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+
+  /* ── RADIOS ── */
+  .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .radio-btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 14px; border: 1.5px solid var(--border);
+    border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 500;
+    transition: all .15s; user-select: none;
+  }
+  .radio-btn input[type=radio] { accent-color: var(--green); }
+  .radio-btn:has(input:checked) { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
+
+  /* ── CONDITIONAL ── */
+  .conditional { display: none; }
+  .conditional.visible { display: block; }
+
+  /* ── REPLANTEO WARNING ── */
+  .rep-warning {
+    background: var(--orange-light); border: 1px solid var(--orange);
+    border-radius: 7px; padding: 10px 14px; font-size: 13px; color: #7A3200;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .rep-warning .icon { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: 8px;
+    padding: 24px; text-align: center; cursor: pointer;
+    transition: all .2s; position: relative;
+  }
+  .upload-zone:hover { border-color: var(--green); background: var(--green-light); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-zone .uz-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone .uz-label { font-size: 13px; font-weight: 600; color: var(--fg2); }
+  .upload-zone .uz-hint { font-size: 11px; color: var(--fg3); margin-top: 2px; }
+  .upload-zone .uz-file { font-size: 13px; color: var(--green); font-weight: 600; margin-top: 6px; display: none; }
+
+  /* ── SUBMIT ── */
+  .btn-submit {
+    width: 100%; padding: 14px; border: none; border-radius: 9px;
+    background: var(--green); color: #fff; font-family: inherit;
+    font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: .02em;
+    transition: background .15s; margin-top: 4px;
+  }
+  .btn-submit:hover { background: var(--green-dark); }
+
+  /* ── SIDEBAR ── */
+  .sidebar-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+  }
+  .sidebar-header {
+    background: var(--green-dark); color: #fff;
+    padding: 12px 16px; font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: .07em;
+  }
+  .state-list { padding: 10px 0; }
+  .state-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 16px; font-size: 12px; font-weight: 500;
+  }
+  .state-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+</style>
+
+<div class="topbar">
+  <span class="topbar-logo">MEGA</span>
+  <span class="topbar-sep">|</span>
+  <span class="topbar-title">Alta de Obra — Formulario de Ingreso</span>
+</div>
+
+<div class="page">
+  <div class="layout">
+
+    <!-- MAIN FORM -->
+    <div class="main">
+
+      <!-- ID CHIP -->
+      <div class="id-chip">
+        <div class="id-left">
+          <span class="id-chip-label">ID de obra</span>
+          <span class="id-chip-value" id="idPreview">MEGA-2026-049</span>
+          <span class="id-chip-hint">Generado automáticamente al guardar</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: DATOS DE VENTA -->
+      <div class="form-card">
+        <div class="section-header"><span class="num">1</span> Datos de la venta</div>
+        <div class="form-body">
+
+          <div class="row-2">
+            <div class="field">
+              <label>Presupuesto Nº <span class="req">*</span></label>
+              <input type="text" id="presupuesto" placeholder="Ej: P-2026-182" oninput="updateId()">
+            </div>
+            <div class="field">
+              <label>Fecha de confirmación <span class="req">*</span></label>
+              <input type="date" id="fecha">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Nombre del vendedor responsable <span class="req">*</span></label>
+            <input type="text" id="vendedor" placeholder="Nombre completo del vendedor">
+          </div>
+
+          <div class="field">
+            <label>Nombre del cliente <span class="req">*</span></label>
+            <input type="text" id="cliente" placeholder="Razón social o nombre completo">
+          </div>
+
+          <div class="field">
+            <label>Teléfono</label>
+            <input type="tel" id="telefono" placeholder="Ej: +54 11 1234-5678">
+          </div>
+
+          <!-- DIRECCIÓN DESGLOSADA -->
+          <div class="field">
+            <label>Dirección de la obra <span class="req">*</span></label>
+          </div>
+          <div class="addr-row1">
+            <div class="field">
+              <label>Calle</label>
+              <input type="text" id="calle" placeholder="Nombre de la calle">
+            </div>
+            <div class="field">
+              <label>Número</label>
+              <input type="text" id="numero" placeholder="Ej: 1245">
+            </div>
+          </div>
+          <div class="addr-row2">
+            <div class="field">
+              <label>Piso</label>
+              <input type="text" id="piso" placeholder="Ej: 3">
+            </div>
+            <div class="field">
+              <label>Dpto</label>
+              <input type="text" id="dpto" placeholder="Ej: B">
+            </div>
+            <div class="field">
+              <label>Localidad <span class="req">*</span></label>
+              <input type="text" id="localidad" placeholder="Ej: Morón">
+            </div>
+          </div>
+
+          <!-- PLAZO -->
+          <div class="row-2">
+            <div class="field">
+              <label>Plazo estimado de entrega <span class="req">*</span></label>
+              <select id="plazo" onchange="calcFecha()">
+                <option value="">— Seleccionar plazo —</option>
+                <option value="15">15 días hábiles</option>
+                <option value="30">30 días hábiles</option>
+                <option value="45">45 días hábiles</option>
+                <option value="60">60 días hábiles</option>
+                <option value="75">75 días hábiles</option>
+                <option value="90">90 días hábiles</option>
+              </select>
+              <div class="date-result" id="fechaCalc"></div>
+            </div>
+            <div class="field">
+              <label>Tipo de trabajo <span class="req">*</span></label>
+              <select id="tipoTrabajo">
+                <option value="">— Seleccionar —</option>
+                <option>Modena</option>
+                <option>A30</option>
+                <option>A30 New</option>
+                <option>A40</option>
+                <option>A40 frente integral</option>
+                <option>PVC</option>
+                <option>Vidrio templado</option>
+                <option>Barandas</option>
+                <option>Reparación</option>
+                <option>Service</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label>Color <span class="req">*</span></label>
+              <select id="color">
+                <option value="">— Seleccionar —</option>
+                <option>Anodizado natural</option>
+                <option>Blanco</option>
+                <option>Negro</option>
+                <option>Foliado</option>
+                <option>Color especial</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Tipo de vidrio <span class="req">*</span></label>
+              <select id="tipoVidrio">
+                <option value="">— Seleccionar —</option>
+                <option>Simple</option>
+                <option>Laminado</option>
+                <option>DVH</option>
+              </select>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="row-2">
+            <div class="field">
+              <label>Total del presupuesto (sin IVA) <span class="req">*</span></label>
+              <input type="number" id="total" placeholder="$ 0.00" min="0" step="0.01">
+            </div>
+            <div class="field">
+              <label>Seña recibida (sin IVA)</label>
+              <input type="number" id="senia" placeholder="$ 0.00" min="0" step="0.01">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Condición de pago acordada <span class="req">*</span></label>
+            <select id="condPago">
+              <option value="">— Seleccionar condición —</option>
+              <option>50% al inicio / 50% a la entrega</option>
+              <option>30% al inicio / 70% a la entrega</option>
+              <option>100% al inicio</option>
+              <option>Financiado en cuotas (especificar)</option>
+              <option>Otro</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SECTION 2: LOGÍSTICA -->
+      <div class="form-card">
+        <div class="section-header"><span class="num">2</span> Logística e instalación</div>
+        <div class="form-body">
+
+          <div class="field">
+            <label>¿La obra requiere instalación? <span class="req">*</span></label>
+            <div class="radio-group" id="instalacion">
+              <label class="radio-btn">
+                <input type="radio" name="inst" value="si" onchange="toggleInst()">
+                Sí, incluye instalación
+              </label>
+              <label class="radio-btn">
+                <input type="radio" name="inst" value="no-entrega" onchange="toggleInst()">
+                No, solo fabricación y entrega
+              </label>
+              <label class="radio-btn">
+                <input type="radio" name="inst" value="no-retiro" onchange="toggleInst()">
+                No, solo fabricación y retiro
+              </label>
+            </div>
+          </div>
+
+          <div class="conditional" id="tipoColDiv">
+            <div class="field">
+              <label>Tipo de colocación <span class="req">*</span></label>
+              <select id="tipoColoc">
+                <option value="">— Seleccionar —</option>
+                <option>Sobre mocheta</option>
+                <option>Sobre premarco</option>
+                <option>Renovación</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>¿Requiere replanteo previo? <span class="req">*</span></label>
+            <div class="radio-group" id="replanteo">
+              <label class="radio-btn">
+                <input type="radio" name="rep" value="si" onchange="toggleRep()">
+                Sí
+              </label>
+              <label class="radio-btn">
+                <input type="radio" name="rep" value="no" onchange="toggleRep()">
+                No
+              </label>
+            </div>
+          </div>
+
+          <div class="conditional" id="repWarning">
+            <div class="rep-warning">
+              <span class="icon">⚠️</span>
+              <span>Esta obra requiere <strong>replanteo previo</strong>. Se iniciará el circuito de coordinación con el equipo técnico antes de confirmar el plazo de entrega.</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SECTION 3: DOCUMENTACIÓN -->
+      <div class="form-card">
+        <div class="section-header"><span class="num">3</span> Documentación técnica</div>
+        <div class="form-body">
+
+          <div class="field">
+            <label>Adjuntar PDF del presupuesto final <span class="req">*</span></label>
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" accept=".pdf" id="fileInput" onchange="handleFile(this)">
+              <div class="uz-icon">📄</div>
+              <div class="uz-label">Arrastrá o hacé clic para adjuntar</div>
+              <div class="uz-hint">Solo archivos PDF</div>
+              <div class="uz-file" id="fileName"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Observaciones comerciales</label>
+            <textarea id="obs" placeholder="Aclaraciones, condiciones especiales, detalles del cliente…"></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btnSubmit">✓ Dar de Alta la Obra</button>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-header">Estados del circuito</div>
+        <div class="state-list">
+          <div class="state-item"><div class="state-dot" style="background:#2D7DD2"></div>Ingresada</div>
+          <div class="state-item"><div class="state-dot" style="background:#F5C842"></div>Replanteo pendiente</div>
+          <div class="state-item"><div class="state-dot" style="background:#8A9B92"></div>En producción</div>
+          <div class="state-item"><div class="state-dot" style="background:#C0392B"></div>Bloqueada</div>
+          <div class="state-item"><div class="state-dot" style="background:#E8631A"></div>Producción terminada</div>
+          <div class="state-item"><div class="state-dot" style="background:#1A7A4A"></div>Habilitada instalar</div>
+          <div class="state-item"><div class="state-dot" style="background:#3AAFA9"></div>Instalación planificada</div>
+          <div class="state-item"><div class="state-dot" style="background:#7B2D8B"></div>Instalada</div>
+          <div class="state-item"><div class="state-dot" style="background:#E8631A;opacity:.6"></div>Posventa</div>
+          <div class="state-item"><div class="state-dot" style="background:#1A1A1A"></div>Obra cerrada</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Auto-fecha
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('fecha').value = today;
+
+  // ID preview
+  let counter = 49;
+  function updateId() {
+    const year = new Date().getFullYear();
+    const p = document.getElementById('presupuesto').value;
+    const num = String(counter).padStart(3,'0');
+    document.getElementById('idPreview').textContent = 'MEGA-' + year + '-' + num;
+  }
+  updateId();
+
+  // Calcular fecha estimada (días hábiles)
+  function calcFecha() {
+    const dias = parseInt(document.getElementById('plazo').value);
+    const el = document.getElementById('fechaCalc');
+    if (!dias) { el.textContent = ''; return; }
+    const feriados = ['01-01','24-03','02-04','25-04','01-05','25-05','17-06','20-06','09-07','17-08','12-10','20-11','08-12','25-12'];
+    let d = new Date(); let count = 0;
+    while (count < dias) {
+      d.setDate(d.getDate() + 1);
+      const dow = d.getDay();
+      const mmdd = String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      if (dow !== 0 && dow !== 6 && !feriados.includes(mmdd)) count++;
+    }
+    const opts = { day: 'numeric', month: 'long', year: 'numeric' };
+    el.textContent = '→ Fecha estimada: ' + d.toLocaleDateString('es-AR', opts);
+  }
+
+  // Toggle instalación → tipo colocación
+  function toggleInst() {
+    const val = document.querySelector('input[name="inst"]:checked')?.value;
+    const div = document.getElementById('tipoColDiv');
+    div.classList.toggle('visible', val === 'si');
+  }
+
+  // Toggle replanteo warning
+  function toggleRep() {
+    const val = document.querySelector('input[name="rep"]:checked')?.value;
+    document.getElementById('repWarning').classList.toggle('visible', val === 'si');
+  }
+
+  // Handle file
+  function handleFile(input) {
+    const f = input.files[0];
+    const fn = document.getElementById('fileName');
+    if (f) {
+      fn.textContent = '✓ ' + f.name;
+      fn.style.display = 'block';
+      document.getElementById('uploadZone').style.borderColor = 'var(--green)';
+    }
+  }
+
+  // Submit
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyr_4NOUZr-YxlAaVrWcich_NnEErwzWZHroGFUfDWB9oNvc4wN5z_fm3-wvfAOA80iwg/exec';
+
+  function submitForm() {
+    const req = ['presupuesto','fecha','vendedor','cliente','localidad','tipoTrabajo','color','tipoVidrio','total','condPago'];
+    let ok = true;
+    req.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (!el || !el.value.trim()) { if(el) el.style.borderColor='var(--red)'; ok=false; }
+      else el.style.borderColor = '';
+    });
+    if (!document.querySelector('input[name="inst"]:checked')) ok = false;
+    if (!document.querySelector('input[name="rep"]:checked')) ok = false;
+    if (!ok) { showToast('Completá los campos obligatorios antes de continuar.','err'); return; }
+
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Registrando…';
+
+    const inst    = document.querySelector('input[name="inst"]:checked').value;
+    const rep     = document.querySelector('input[name="rep"]:checked').value;
+    const instVal = document.getElementById('instDiv') ? (document.getElementById('tipoColoc') ? document.getElementById('tipoColoc').value : '') : '';
+
+    const payload = {
+      accion:           'alta',
+      presupuestoNro:   document.getElementById('presupuesto').value.trim(),
+      fechaEstEntrega:  document.getElementById('fecha').value,
+      vendedor:         document.getElementById('vendedor').value.trim(),
+      cliente:          document.getElementById('cliente').value.trim(),
+      telefono:         document.getElementById('telefono') ? document.getElementById('telefono').value.trim() : '',
+      calle:            document.getElementById('calle') ? document.getElementById('calle').value.trim() : '',
+      numero:           document.getElementById('numero') ? document.getElementById('numero').value.trim() : '',
+      piso:             document.getElementById('piso') ? document.getElementById('piso').value.trim() : '',
+      dpto:             document.getElementById('dpto') ? document.getElementById('dpto').value.trim() : '',
+      direccionObra:    [document.getElementById('calle')?document.getElementById('calle').value:'', document.getElementById('numero')?document.getElementById('numero').value:''].filter(Boolean).join(' '),
+      localidad:        document.getElementById('localidad').value.trim(),
+      tipoTrabajo:      document.getElementById('tipoTrabajo').value.trim(),
+      color:            document.getElementById('color').value.trim(),
+      tipoVidrio:       document.getElementById('tipoVidrio').value.trim(),
+      plazo:            document.getElementById('plazo') ? document.getElementById('plazo').value : '',
+      total:            document.getElementById('total').value.trim(),
+      senia:            document.getElementById('senia') ? document.getElementById('senia').value.trim() : '',
+      condPago:         document.getElementById('condPago').value.trim(),
+      instalacion:      inst,
+      tipoColocacion:   instVal,
+      replanteo:        rep,
+      obsComerciales:   document.getElementById('obs') ? document.getElementById('obs').value.trim() : ''
+    };
+
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        showToast('✓ Obra ' + data.id + ' registrada correctamente. El equipo fue notificado.', 'ok');
+        btnSubmit.textContent = '✓ Registrada — ' + data.id;
+        // Actualizar el ID preview con el real
+        const chip = document.getElementById('idChip');
+        if(chip) chip.textContent = data.id;
+      } else {
+        showToast('Error al registrar: ' + (data.error || 'intente nuevamente'), 'err');
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Registrar obra';
+      }
+    })
+    .catch(function(err) {
+      showToast('Error de conexión. Verificá internet e intentá de nuevo.', 'err');
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Registrar obra';
+    });
+  }
+
+  function showToast(msg, tipo) {
+    var t = document.getElementById('toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.2);max-width:90%;text-align:center;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.background = tipo === 'ok' ? '#1A7A4A' : '#C0392B';
+    t.style.color = '#fff';
+    t.style.display = 'block';
+    setTimeout(function(){ t.style.display='none'; }, 5000);
+  }
+
+  // Listeners — al final para que las funciones ya estén definidas
+  document.getElementById('btnSubmit').addEventListener('click', submitForm);
+</script>
